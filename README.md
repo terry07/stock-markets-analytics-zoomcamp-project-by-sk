@@ -3,3 +3,13 @@ As a participant in the Stock Market Analytics Zoomcamp of 2025, we are required
 
 - `Course link`: https://pythoninvest.com/course
 - `Github repo`: https://github.com/DataTalksClub/stock-markets-analytics-zoomcamp/tree/main
+
+
+## Dependencies Installation
+
+Create new Python environment for installing the necessary dependencies. The suggested and verified steps are the following, using conda environment:
+
+```bash
+conda create -n <YOUR-PREFERRED-NAME> python==3.12
+```
+
