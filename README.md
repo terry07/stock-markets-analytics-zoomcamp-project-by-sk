@@ -1,2 +1,5 @@
 # stock-markets-analytics-zoomcamp-project-by-sk
-As participant in stock markets analytics zoomcamp, we are asked to deliver a final project whose goal is to apply everything we have learned in this course to build an end-to-end machine learning pipeline. The utmost ambition is to run a simulation where we can evaluate our investment strategies before apply them in practice. 
+As a participant in the Stock Market Analytics Zoomcamp of 2025, we are required to deliver a final project that applies everything we have learned in the course to build an end-to-end machine learning pipeline. The ultimate goal is to run simulations that allow us to evaluate investment strategies before applying them in practice. 
+
+- `Course link`: https://pythoninvest.com/course
+- `Github repo`: https://github.com/DataTalksClub/stock-markets-analytics-zoomcamp/tree/main
