@@ -24,3 +24,9 @@ pre-commit install
 ```
 
 If `pre-commit` is enabled, you will see output from the hooks (ruff, black, isort) running before the commit is finalized. If there are issues, the commit will be blocked until you fix them.
+
+If you want to manually run `pre-commit`, e.g., for including files that had been oushed before setting that functionality, run the next command:
+
+```bash
+pre-commit run --all-files
+```

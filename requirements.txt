@@ -4,6 +4,6 @@ isort
 jupyter-ruff
 lxml
 pre-commit
-ruff
 requests
+ruff
 yfinance
