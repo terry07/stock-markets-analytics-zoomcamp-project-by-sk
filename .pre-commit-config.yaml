@@ -1,13 +1,38 @@
 repos:
-  - repo: https://github.com/charliermarsh/ruff
-    rev: stable
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.1
     hooks:
       - id: ruff
-  - repo: https://github.com/psf/black
-    rev: stable
+        types_or: [python, jupyter]
+        args: [--fix, --verbose]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
     hooks:
-      - id: black
-  - repo: https://github.com/PyCQA/isort
-    rev: stable
+      - id: end-of-file-fixer
+        name: Add extra line at the end of files
+      - id: trailing-whitespace
+        name: Trim trailing spaces
+        exclude: .bumpversion.cfg
+      - id: check-docstring-first
+        name: Check docstring before code
+      - id: check-json
+        name: Check .json files syntax
+      - id: check-merge-conflict
+        name: Check merge conflicts
+      - id: check-yaml
+        name: Check .yaml files syntax
+      - id: fix-encoding-pragma
+        name: Adding encoding information to files
+      - id: requirements-txt-fixer
+        name: Sort entries in requirements.*\.txt files
+        files: requirements.*\.txt$
+      - id: check-toml
+        name: Checking .toml
+
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
     hooks:
       - id: isort
+        name: Running isort
