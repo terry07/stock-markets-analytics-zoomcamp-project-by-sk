@@ -1,4 +1,5 @@
 ipykernel
+jupyter-ruff
 lxml
 ruff
 requests
