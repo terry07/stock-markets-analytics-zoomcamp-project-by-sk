@@ -282,7 +282,7 @@ def features_based_on_fundamentals(ticker, end_date) -> dict:
     return fund_feats_float
 
 
-def _get_talib_pattern_indicators(df) -> pd.DataFrame:
+def get_talib_pattern_indicators(df) -> pd.DataFrame:
     """Computes a comprehensive set of candlestick pattern recognition indicators using TA-Lib for the given DataFrame.
 
     This function applies all available TA-Lib candlestick pattern functions to the input DataFrame, which must contain
@@ -564,7 +564,7 @@ def _get_talib_pattern_indicators(df) -> pd.DataFrame:
     return pattern_indicators_df
 
 
-def _get_talib_momentum_indicators(df) -> pd.DataFrame:
+def get_talib_momentum_indicators(df) -> pd.DataFrame:
     """Calculate various momentum indicators using TA-Lib for a given DataFrame of stock data.
 
     Parameters
