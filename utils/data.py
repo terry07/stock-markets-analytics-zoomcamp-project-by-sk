@@ -129,8 +129,8 @@ def features_based_on_price(df, ticker) -> pd.DataFrame:
     df_resampled.drop(columns=['mma_3', 'mma_6'], inplace=True)
 
 
-    # round data to 4 decimal places
-    df_resampled = df_resampled.round(4)
+    # round data to 6 decimal places
+    df_resampled = df_resampled.round(6)
 
 
     # add typical metadata for completeness
@@ -271,8 +271,8 @@ def features_based_on_fundamentals(ticker, end_date) -> dict:
         'fullTimeEmployees': info.get('fullTimeEmployees', np.nan),
     }
 
-    # round float features to 4 decimal places, keep NaNs and categorical variables intact
-    fund_feats_float = {k: np.round(v,4) if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v)
+    # round float features to 6 decimal places, keep NaNs and categorical variables intact
+    fund_feats_float = {k: np.round(v,6) if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v)
                         else v for k, v in fund_feats.items()}
 
     # count missing values
