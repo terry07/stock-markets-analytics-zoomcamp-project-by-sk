@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -24,9 +26,8 @@ def features_based_on_price(df, ticker):
     """Download daily prices for each provided and valid ticker,
       and calculate several related features.
 
-      The final dataset is resample on monthly basis (month-end).
+      The final dataset is resampled on monthly basis (month-end).
     """
-
     # Set `Adjusted Close`  in place of `Close`, if available
     price_col = 'Adj Close' if 'Adj Close' in df.columns else 'Close'
     if price_col == 'Close' and 'Adj Close' not in df.columns:
@@ -138,3 +139,140 @@ def features_based_on_price(df, ticker):
     print(f"Final data shape for {ticker}: ", df_resampled.shape)
 
     return df_resampled
+
+
+def safe_get_latest(bs_df, row_name):
+    """Safely get the latest value from a balance sheet DataFrame."""
+    if bs_df is not None and row_name in bs_df.index:
+
+        series = bs_df.loc[row_name].dropna()
+        if not series.empty:
+            return series.iloc[0]
+
+    return np.nan
+
+def features_based_on_fundamentals(ticker, end_date):
+    """Download quarterly fundamentals for each provided and valid ticker,
+      and calculate several related features.
+
+      The final dataset is resampled on monthly basis (month-end).
+    """
+    tk = yf.Ticker(ticker)
+
+    # extract fundamental data based on provided ticket
+    actions = tk.get_actions()
+    bs = tk.get_balance_sheet()
+    calendar = tk.get_calendar()
+    cf = tk.get_cashflow()
+    holders = tk.get_institutional_holders()
+    info = tk.get_info() or {}
+    recommendations = tk.get_recommendations()
+    sustainability = tk.get_sustainability()
+
+
+    # get the latest available values safely before BS-based calculations
+    total_assets = safe_get_latest(bs, 'TotalAssets')
+    total_liabilities = safe_get_latest(bs, 'TotalLiabilitiesNetMinorityInterest')
+    total_equity = safe_get_latest(bs, 'StockholdersEquity')
+    long_term_debt = safe_get_latest(bs, 'LongTermDebt')
+    current_assets = safe_get_latest(bs, 'CurrentAssets')
+    current_liabilities = safe_get_latest(bs, 'CurrentLiabilities')
+    cash_equivalents = safe_get_latest(bs, 'CashAndCashEquivalents')
+    retained_earnings = safe_get_latest(bs, 'RetainedEarnings')
+    working_capital = safe_get_latest(bs, 'WorkingCapital')
+
+
+    # Balance Sheet parameters
+    debt_to_equity = total_liabilities / total_equity if total_equity else np.nan
+    current_ratio = current_assets / current_liabilities if current_liabilities else np.nan
+    cash_ratio = cash_equivalents / current_liabilities if current_liabilities else np.nan
+    working_capital_ratio = working_capital / total_assets if total_assets else np.nan
+    retained_earnings_to_assets = retained_earnings / total_assets if total_assets else np.nan
+    long_term_debt_to_equity = long_term_debt / total_equity if total_equity else np.nan
+    op_cf = cf.loc['OperatingCashFlow'].iloc[0] if cf is not None and 'OperatingCashFlow' in cf.index else None
+    revenue = info.get('totalRevenue')
+    operating_cf_margin = op_cf / revenue if op_cf and revenue else np.nan
+    free_cf = cf.loc['FreeCashFlow'].iloc[0] if cf is not None and 'FreeCashFlow' in cf.index else None
+    free_cf_margin = free_cf / revenue if free_cf and revenue else np.nan
+
+
+    # Institutional holders
+    pct_held = holders['pctHeld'].mean() if holders is not None and not holders.empty else np.nan
+    inst_count = len(holders) if holders is not None else np.nan
+
+
+    # ESG scores
+    esg_env = sustainability.loc['environmentScore'].iloc[0] if sustainability is not None and 'environmentScore' in sustainability.index else np.nan
+    esg_soc = sustainability.loc['socialScore'].iloc[0] if sustainability is not None and 'socialScore' in sustainability.index else np.nan
+    esg_gov = sustainability.loc['governanceScore'].iloc[0] if sustainability is not None and 'governanceScore' in sustainability.index else np.nan
+
+
+    # Recommendations up to 3 months back
+    recent_reco = 0
+    if recommendations is not None and not recommendations.empty:
+        recent_months = recommendations[recommendations['period'].isin(['0m', '-1m', '-2m', '-3m'])]
+        recent_reco = recent_months[['strongBuy', 'buy', 'hold', 'sell', 'strongSell']].sum().sum()
+        strong_to_total_ratio = recent_months['strongBuy'].sum() / recent_reco if recent_reco else np.nan
+
+
+    # Days to next earnings
+    days_to_earnings = np.nan
+    if calendar and isinstance(calendar, dict) and 'Earnings Date' in calendar:
+        earnings_dates = calendar['Earnings Date']
+        if isinstance(earnings_dates, list) and len(earnings_dates) > 0:
+            earnings_date = earnings_dates[0]
+            if isinstance(earnings_date, (datetime.date, datetime.datetime)):
+                earnings_datetime = pd.to_datetime(earnings_date)
+                days_to_earnings = (earnings_datetime - pd.to_datetime(end_date)).days
+
+
+    # Dividend stability: std of yearly dividend sums / mean dividend sums
+    dividend_stability = np.nan
+    if actions is not None and 'Dividends' in actions.columns:
+        yearly_divs = actions['Dividends'].resample('YE').sum()
+        if len(yearly_divs) > 1 and yearly_divs.mean() != 0:
+            dividend_stability = yearly_divs.std() / yearly_divs.mean()
+
+    fund_feats = {
+        'marketCap': info.get('marketCap', np.nan),
+        'beta': info.get('beta', np.nan),
+        'trailingPE': info.get('trailingPE', np.nan),
+        'forwardPE': info.get('forwardPE', np.nan),
+        'trailing_PEG': info.get('trailingPegRatio', np.nan),
+        'priceToBook': info.get('priceToBook', np.nan),
+        'dividendYield': info.get('dividendYield', np.nan),
+        'debt_to_equity': debt_to_equity,
+        'debt_to_equity': debt_to_equity,
+        'current_ratio': current_ratio,
+        'cash_ratio': cash_ratio,
+        'working_capital': working_capital,
+        'working_capital_ratio': working_capital_ratio,
+        'retained_earnings_to_assets': retained_earnings_to_assets,
+        'long_term_debt_to_equity': long_term_debt_to_equity,
+        'operating_cf_margin': operating_cf_margin,
+        'free_cf_margin': free_cf_margin,
+        'pct_held_by_inst': pct_held,
+        'institutional_holders_count': inst_count,
+        'esg_env': esg_env,
+        'esg_soc': esg_soc,
+        'esg_gov': esg_gov,
+        'recent_rating_changes': recent_reco,
+        'strong_to_total_reco_ratio': strong_to_total_ratio,
+        'days_to_next_earnings': days_to_earnings,
+        'dividend_stability': dividend_stability,
+        'companyName': info.get('shortName', np.nan),
+        'sector': info.get('sector'),
+        'industry': info.get('industry'),
+        'country': info.get('country'),
+        'fullTimeEmployees': info.get('fullTimeEmployees', np.nan),
+    }
+
+    # round float features to 4 decimal places, keep NaNs and categorical variables intact
+    fund_feats_float = {k: np.round(v,4) if isinstance(v, (int, float, np.integer, np.floating)) and not pd.isnull(v)
+                        else v for k, v in fund_feats.items()}
+
+    # count missing values
+    missing_count = sum(pd.isnull(v) for v in fund_feats_float.values())
+    print(f"Number of missing values in fund_feats_float: {missing_count}")
+
+    return fund_feats_float
