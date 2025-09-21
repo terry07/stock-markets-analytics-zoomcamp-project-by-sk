@@ -1,28 +1,31 @@
 # -*- coding: utf-8 -*-
 import datetime
+from typing import Union
 
 import numpy as np
 import pandas as pd
 import yfinance as yf
 
 
-def get_date_of_previous_month():
+def get_date_of_previous_month() -> str:
     """Set end_date as the last date of the previous month."""
 
     today = pd.to_datetime('today')
     first_day_this_month = today.replace(day=1)
 
     end_date = (first_day_this_month - pd.Timedelta(days=1)).strftime('%Y-%m-%d')
+
     return end_date
 
-def clean_market_cap(df):
+def clean_market_cap(df) -> pd.DataFrame:
     """Clean 'Market Cap' column and convert to numeric"""
     df['Market Cap'] = df['Market Cap'].str.replace('$', '').str.replace('B', '').str.replace('M', '').str.replace(',', '')
     df['Market Cap'] = pd.to_numeric(df['Market Cap'], errors='coerce')
+
     return df
 
 
-def features_based_on_price(df, ticker):
+def features_based_on_price(df, ticker) -> pd.DataFrame:
     """Download daily prices for each provided and valid ticker,
       and calculate several related features.
 
@@ -141,7 +144,7 @@ def features_based_on_price(df, ticker):
     return df_resampled
 
 
-def safe_get_latest(bs_df, row_name):
+def safe_get_latest(bs_df, row_name) -> Union[float, int, str]:
     """Safely get the latest value from a balance sheet DataFrame."""
     if bs_df is not None and row_name in bs_df.index:
 
@@ -151,7 +154,7 @@ def safe_get_latest(bs_df, row_name):
 
     return np.nan
 
-def features_based_on_fundamentals(ticker, end_date):
+def features_based_on_fundamentals(ticker, end_date) -> dict:
     """Download quarterly fundamentals for each provided and valid ticker,
       and calculate several related features.
 
