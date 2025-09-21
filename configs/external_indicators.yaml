@@ -1,0 +1,22 @@
+tickers_macro:
+  sp500: "^GSPC"
+  vix: "^VIX"
+  dax: "^GDAXI"
+  spy: "SPY"
+  gld: "GLD"
+  vgk: "VGK"
+  xlv: "XLV"
+  xlk: "XLK"
+  xlf: "XLF"
+  efa: "EFA"
+  eurusd: "EURUSD=X"
+  usdx: "DX-Y.NYB"
+
+fred_series:
+  gdp_us: "GDPC1"
+  cpi_us: "CPIAUCSL"
+  unemployment_us: "UNRATE"
+  interest_us: "FEDFUNDS"
+  gdp_de: "CLVMNACSCAB1GQDE"
+  cpi_de: "DEUCPIALLMINMEI"
+  interest_eu: "IRLTLT01EZM156N"

@@ -3,7 +3,10 @@ ipykernel
 isort
 jupyter-ruff
 lxml
+pandas-datareader
 pre-commit
+pyyaml
 requests
 ruff
+TA-Lib
 yfinance
