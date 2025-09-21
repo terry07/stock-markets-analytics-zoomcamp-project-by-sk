@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+from functools import reduce
 from typing import Union
 
 import numpy as np
@@ -759,18 +760,17 @@ def get_talib_momentum_indicators(df) -> pd.DataFrame:
     return momentum_df
 
 
-def get_macro_market_data(fred_mapping, start_date, end_date) -> Union[pd.DataFrame, dict]:
-    """Fetches major market indices, ETFs, and forex rates.
+def get_economic_indicators_fred(fred_mapping, start_date, end_date) -> Union[pd.DataFrame, dict]:
+    """Retrieves macroeconomic time series from FRED (Federal Reserve Economic Data).
 
-       Most representative examlples are S&P 500, VIX, DAX, sector ETFs, and USD indices.
+    More specifically, it includes GDP, CPI, Unemployment, and Interest Rates for the US, Germany, and Euro Area.
 
     Returns
     -------
     pd.DataFrame or dict
-        Real-time or historical market data for macroeconomic tickers.
+        Latest or historical readings of key economic indicators.
     """
-    print(f"Retrieve fred fearures for the selected period...\n")
-    print("-"*24, "\n")
+    print(f"Retrieve fred series for the selected period...\n")
 
     dataset_fred = dict()
 
@@ -800,3 +800,54 @@ def get_macro_market_data(fred_mapping, start_date, end_date) -> Union[pd.DataFr
     dataset_fred = pd.concat(dataset_fred.values(), axis=1).resample('ME').last().fillna(method='ffill')
 
     return dataset_fred
+
+def get_macro_market_data(tickers_macro, start_date, end_date) -> Union[pd.DataFrame, dict]:
+    """Fetches major market indices, ETFs, and forex rates.
+
+       Most representative examlples are S&P 500, VIX, DAX, sector ETFs, and USD indices.
+
+    Returns
+    -------
+    pd.DataFrame or dict
+        Real-time or historical market data for macroeconomic tickers.
+    """
+    print(f"Retrieve major tickers for the selected period...\n")
+
+    dataset_macro = []
+
+    for name, code in tickers_macro.items():
+
+        try:
+
+            data = yf.Ticker(code).history(start=start_date, end=end_date, interval='1d')
+
+            if data.empty:
+                print(f"No data for {code}, skipping.")
+
+            else:
+                price_col = 'Adj Close' if 'Adj Close' in data.columns else 'Close'
+                df = data[[price_col]].rename(columns={price_col: 'Close'})
+
+            # Resample to month-end
+            df = df.resample('ME').last()
+            df.index = pd.to_datetime(df.index).tz_localize(None)
+            df.reset_index(inplace=True)
+
+            # Rename column to friendly name
+            df = df.rename(columns={'Close': name})
+
+            dataset_macro.append(df)
+
+        except Exception as e:
+            print(f"[ERROR] {name} ({code}): {e}")
+            continue
+
+    if not dataset_macro:
+        print("No macro features collected.")
+        return pd.DataFrame()
+
+    # Merge all seperate lists on `Date` index they have in common
+    dataset_macro_merged = reduce(lambda left, right: pd.merge(left, right, on='Date', how='outer'), dataset_macro)
+    dataset_macro_merged = dataset_macro_merged.rename(columns={'Date': 'date'})
+
+    return dataset_macro_merged

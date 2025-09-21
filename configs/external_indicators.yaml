@@ -1,3 +1,13 @@
+fred_series:
+  gdp_us: "GDPC1"
+  cpi_us: "CPIAUCSL"
+  unemployment_us: "UNRATE"
+  interest_us: "FEDFUNDS"
+  gdp_de: "CLVMNACSCAB1GQDE"
+  cpi_de: "DEUCPIALLMINMEI"
+  interest_eu: "IRLTLT01EZM156N"
+
+
 tickers_macro:
   sp500: "^GSPC"
   vix: "^VIX"
@@ -11,12 +21,3 @@ tickers_macro:
   efa: "EFA"
   eurusd: "EURUSD=X"
   usdx: "DX-Y.NYB"
-
-fred_series:
-  gdp_us: "GDPC1"
-  cpi_us: "CPIAUCSL"
-  unemployment_us: "UNRATE"
-  interest_us: "FEDFUNDS"
-  gdp_de: "CLVMNACSCAB1GQDE"
-  cpi_de: "DEUCPIALLMINMEI"
-  interest_eu: "IRLTLT01EZM156N"
