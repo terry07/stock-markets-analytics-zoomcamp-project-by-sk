@@ -3,6 +3,7 @@ ipykernel
 isort
 jupyter-ruff
 lxml
+matplotlib
 pandas-datareader
 pre-commit
 pyyaml

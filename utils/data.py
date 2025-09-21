@@ -799,6 +799,9 @@ def get_economic_indicators_fred(fred_mapping, start_date, end_date) -> Union[pd
 
     dataset_fred = pd.concat(dataset_fred.values(), axis=1).resample('ME').last().fillna(method='ffill')
 
+    # Align index and reset
+    dataset_fred = dataset_fred.rename_axis('Date').reset_index()
+
     return dataset_fred
 
 def get_macro_market_data(tickers_macro, start_date, end_date) -> Union[pd.DataFrame, dict]:
@@ -848,6 +851,5 @@ def get_macro_market_data(tickers_macro, start_date, end_date) -> Union[pd.DataF
 
     # Merge all seperate lists on `Date` index they have in common
     dataset_macro_merged = reduce(lambda left, right: pd.merge(left, right, on='Date', how='outer'), dataset_macro)
-    dataset_macro_merged = dataset_macro_merged.rename(columns={'Date': 'date'})
 
     return dataset_macro_merged
