@@ -4,6 +4,7 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+import pandas_datareader as pdr
 import talib
 import yfinance as yf
 
@@ -756,3 +757,46 @@ def get_talib_momentum_indicators(df) -> pd.DataFrame:
       }
     )
     return momentum_df
+
+
+def get_macro_market_data(fred_mapping, start_date, end_date) -> Union[pd.DataFrame, dict]:
+    """Fetches major market indices, ETFs, and forex rates.
+
+       Most representative examlples are S&P 500, VIX, DAX, sector ETFs, and USD indices.
+
+    Returns
+    -------
+    pd.DataFrame or dict
+        Real-time or historical market data for macroeconomic tickers.
+    """
+    print(f"Retrieve fred fearures for the selected period...\n")
+    print("-"*24, "\n")
+
+    dataset_fred = dict()
+
+    for name, code in fred_mapping.items():
+
+        try:
+
+            df = pdr.DataReader(code, "fred", start=start_date, end=end_date)
+            if df.empty:
+                print(f"[FRED] No data for {name} ({code}), skipping.")
+
+            else:
+
+                # Rename column to friendly name
+                df = df.rename(columns={code: name})
+
+            dataset_fred[name] = df
+
+        except Exception as e:
+            print(f"[FRED] Error for {name} ({code}): {e}")
+            continue
+
+    if not dataset_fred:
+        print("No FRED data retrieved.")
+        return pd.DataFrame()
+
+    dataset_fred = pd.concat(dataset_fred.values(), axis=1).resample('ME').last().fillna(method='ffill')
+
+    return dataset_fred
