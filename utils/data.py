@@ -853,3 +853,101 @@ def get_macro_market_data(tickers_macro, start_date, end_date) -> Union[pd.DataF
     dataset_macro_merged = reduce(lambda left, right: pd.merge(left, right, on='Date', how='outer'), dataset_macro)
 
     return dataset_macro_merged
+
+
+def temporal_split(df, min_date, max_date, train_prop=0.7, val_prop=0.15) -> pd.DataFrame:
+    """
+    Splits a DataFrame into three buckets based on the temporal order of the 'Date' column.
+
+    Args:
+        df (DataFrame): The DataFrame to split.
+        min_date (str or Timestamp): Minimum date in the DataFrame.
+        max_date (str or Timestamp): Maximum date in the DataFrame.
+        train_prop (float): Proportion of data for training set (default: 0.6).
+        val_prop (float): Proportion of data for validation set (default: 0.2).
+        test_prop (float): Proportion of data for test set (default: 0.2).
+
+    Returns:
+        DataFrame: The input DataFrame with a new column 'split' indicating the split for each row.
+    """
+    # Define the date intervals
+    train_end = min_date + pd.Timedelta(days=(max_date - min_date).days * train_prop)
+    val_end = train_end + pd.Timedelta(days=(max_date - min_date).days * val_prop)
+
+    # Assign split labels based on date ranges
+    split_labels = []
+    for date in df['Date']:
+        if date <= train_end:
+            split_labels.append('train')
+        elif date <= val_end:
+            split_labels.append('validation')
+        else:
+            split_labels.append('test')
+
+    # Add 'split' column to the DataFrame
+    df['split'] = split_labels
+
+    return df
+
+def preprocessing_missing_values(dataset) -> pd.DataFrame:
+        """Preprocesses the DataFrame by handling missing values.
+
+        Args:
+                df (DataFrame): The DataFrame to preprocess.
+
+        Returns:
+                DataFrame: The preprocessed DataFrame with missing values handled.
+        """
+        columns_with_nan = dataset.columns[dataset.isnull().any()].tolist()
+        print("-"*24, "Columns to handle with missing values: ", list(columns_with_nan), "\n\n")
+        print("Before imputation: \n", dataset[columns_with_nan].isnull().sum())
+
+        # Fill dividend-related columns with zeros for NaN values
+        dividend_columns = ['dividendYield', 'dividend_stability']
+        dataset[dividend_columns] = dataset[dividend_columns].fillna(0)
+
+        # Follow a more nuanced imputation (e.g., industry-based) for the rest variables
+        # Impute 'trailing_PEG' with median based on industry
+        dataset['trailing_PEG'] = dataset.groupby('industry')['trailing_PEG'].transform(lambda x: x.fillna(x.median()))
+
+        # Impute all variables starting with 'esg' with median based on sector, country and industry, sequentially
+        esg_factors = ['esg_env', 'esg_soc', 'esg_gov']
+        for col in esg_factors:
+                for group in ['sector', 'industry', 'country']:
+                        dataset[col] = dataset.groupby(group)[col].transform(lambda x: x.fillna(x.median()))
+
+
+        # Fill 'days_to_next_earnings' with 66 for missing values (the maximum value for 3-month period forecast)
+        dataset['days_to_next_earnings'] = dataset['days_to_next_earnings'].fillna(66)
+
+        # Check results
+        print("After imputation: \n", dataset[columns_with_nan].isnull().sum())
+        assert dataset.isnull().sum().sum() == 0, "There are still missing values in the dataset"
+
+        # if any NaN values remain, drop the columns (should not happen)
+        dataset = dataset.dropna(axis=1)
+
+
+        return dataset
+
+def preprocessing_cyclical_features(dataset, variable) -> pd.DataFrame:
+        """Preprocesses the DataFrame by transforming cyclical features using sine and cosine transformations.
+
+        Args:
+                df (DataFrame): The DataFrame to preprocess.
+                variable (str): The name of the cyclical feature to transform.
+        Returns:
+                DataFrame: The preprocessed DataFrame with cyclical features transformed.
+        """
+        if variable in dataset.columns:
+                print(f"Applying cyclical transformation to the '{variable}' variable...\n")
+
+                # Apply cyclical transformation to the passed variable
+                dataset[variable + '_sin'] = np.sin(2 * np.pi * dataset[variable] / 12)
+                dataset[variable + '_cos'] = np.cos(2 * np.pi * dataset[variable] / 12)
+
+                # Display the first few rows to verify the transformation
+                dataset[[variable, variable + '_sin', variable + '_cos']].head()
+        else:
+                print(f"Variable '{variable}' not found in the dataset.")
+                return dataset

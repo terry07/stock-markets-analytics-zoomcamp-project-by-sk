@@ -9,5 +9,6 @@ pre-commit
 pyyaml
 requests
 ruff
+scikit-learn
 TA-Lib
 yfinance
