@@ -856,8 +856,7 @@ def get_macro_market_data(tickers_macro, start_date, end_date) -> Union[pd.DataF
 
 
 def temporal_split(df, min_date, max_date, train_prop=0.7, val_prop=0.15) -> pd.DataFrame:
-    """
-    Splits a DataFrame into three buckets based on the temporal order of the 'Date' column.
+    """Splits a DataFrame into three buckets based on the temporal order of the 'Date' column.
 
     Args:
         df (DataFrame): The DataFrame to split.
@@ -899,8 +898,8 @@ def preprocessing_missing_values(dataset) -> pd.DataFrame:
                 DataFrame: The preprocessed DataFrame with missing values handled.
         """
         columns_with_nan = dataset.columns[dataset.isnull().any()].tolist()
-        print("-"*24, "Columns to handle with missing values: ", list(columns_with_nan), "\n\n")
-        print("Before imputation: \n", dataset[columns_with_nan].isnull().sum())
+        print("-"*24, "\n\n", "Columns to handle with missing values: ", list(columns_with_nan), "\n\n")
+        print("Before imputation:\n", dataset[columns_with_nan].isnull().sum())
 
         # Fill dividend-related columns with zeros for NaN values
         dividend_columns = ['dividendYield', 'dividend_stability']
@@ -921,7 +920,7 @@ def preprocessing_missing_values(dataset) -> pd.DataFrame:
         dataset['days_to_next_earnings'] = dataset['days_to_next_earnings'].fillna(66)
 
         # Check results
-        print("After imputation: \n", dataset[columns_with_nan].isnull().sum())
+        print("After imputation:\n", dataset[columns_with_nan].isnull().sum())
         assert dataset.isnull().sum().sum() == 0, "There are still missing values in the dataset"
 
         # if any NaN values remain, drop the columns (should not happen)
@@ -947,7 +946,7 @@ def preprocessing_cyclical_features(dataset, variable) -> pd.DataFrame:
                 dataset[variable + '_cos'] = np.cos(2 * np.pi * dataset[variable] / 12)
 
                 # Display the first few rows to verify the transformation
-                dataset[[variable, variable + '_sin', variable + '_cos']].head()
+                print(dataset[[variable, variable + '_sin', variable + '_cos']].head())
         else:
                 print(f"Variable '{variable}' not found in the dataset.")
-                return dataset
+        return dataset
