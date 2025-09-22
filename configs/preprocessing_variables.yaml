@@ -1,0 +1,13 @@
+DUMMY_VARIABLES:
+  - ticker
+  - sector
+  - industry
+
+DROP_VARIABLES:
+ - Date
+ - TARGET
+ - companyName
+ - country
+
+CYCLICAL_VARIABLES:
+ - month
