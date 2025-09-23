@@ -4,10 +4,6 @@ import sys
 from datetime import datetime
 
 import joblib
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import seaborn as sns
 import yaml
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
@@ -30,14 +26,13 @@ def data_split(dataset, target_column='is_positive_growth_3m_future'):
         raise ValueError("The dataset must contain a 'split' column with values 'train', 'validation', and 'test'.")
 
     # Define features (X) and target (y) per split
-
-    train_df = dataset[dataset.split.isin(['train'])].copy(deep=True).drop(columns=[target_column, 'split'])
-    valid_df = dataset[dataset.split.isin(['validation'])].copy(deep=True).drop(columns=[target_column, 'split'])
+    #train_df = dataset[dataset.split.isin(['train'])].copy(deep=True).drop(columns=[target_column, 'split'])
+    #valid_df = dataset[dataset.split.isin(['validation'])].copy(deep=True).drop(columns=[target_column, 'split'])
     train_valid_df = dataset[dataset.split.isin(['train','validation'])].copy(deep=True).drop(columns=[target_column, 'split'])
     test_df =  dataset[dataset.split.isin(['test'])].copy(deep=True).drop(columns=[target_column, 'split'])
 
-    y_train = dataset[dataset.split.isin(['train'])].copy(deep=True)[target_column]
-    y_valid = dataset[dataset.split.isin(['validation'])].copy(deep=True)[target_column]
+    #y_train = dataset[dataset.split.isin(['train'])].copy(deep=True)[target_column]
+    #y_valid = dataset[dataset.split.isin(['validation'])].copy(deep=True)[target_column]
     y_train_valid = dataset[dataset.split.isin(['train','validation'])].copy(deep=True)[target_column]
     y_test =  dataset[dataset.split.isin(['test'])].copy(deep=True)[target_column]
 
@@ -220,19 +215,18 @@ def tune_and_select_best_classifier(X_train_valid, y_train_valid, X_test, y_test
         'confusion_matrix': best_info['confusion_matrix']
     }
 
-    with open('../configs/best_model_parameters.yaml', 'w') as f:
+    # Define folder for saving models
+    custom_folder = '../saved_models/'
+    os.makedirs(custom_folder, exist_ok=True)
+
+
+    with open(custom_folder + '/best_model_parameters.yaml', 'w') as f:
         yaml.dump(yaml_dict, f)
 
-    # Export your model using joblib as you already do:
-    #model_filename = f'{best_name.lower()}_model.joblib'
-    #joblib.dump(best_info['model'], model_filename)
 
     # Format today's date as YYYYMMDD
     today_str = datetime.now().strftime('%Y%m%d')
 
-    # Define folder for saving models
-    custom_folder = '../configs'
-    os.makedirs(custom_folder, exist_ok=True)
 
     # Build filename with date
     model_filename = f"model_{best_name.lower()}_trainingDate_{today_str}.joblib"
