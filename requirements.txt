@@ -10,5 +10,6 @@ pyyaml
 requests
 ruff
 scikit-learn
+seaborn
 TA-Lib
 yfinance
