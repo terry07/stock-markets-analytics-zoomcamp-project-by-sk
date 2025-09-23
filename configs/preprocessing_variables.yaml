@@ -8,6 +8,7 @@ DROP_VARIABLES:
  - TARGET
  - companyName
  - country
+ - year
 
 CYCLICAL_VARIABLES:
  - month
