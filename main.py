@@ -449,8 +449,13 @@ class StockAnalyticsPipeline:
 
         # Train and tune models
         print("  🔍 Hyperparameter tuning and model selection...")
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        custom_folder = os.path.join(script_dir, 'saved_models')
+        print(f"  💾 Models will be saved to: {custom_folder}")
+
         best_model, best_model_name, best_params, best_metric = tune_and_select_best_classifier(
-            X_train_valid, y_train_valid, X_test, y_test
+            X_train_valid, y_train_valid, X_test, y_test, folder_to_save=custom_folder
         )
 
         # Evaluate final model
