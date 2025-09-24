@@ -9,11 +9,13 @@ As a participant in the Stock Market Analytics Zoomcamp of 2025, we are required
 
 This project builds a sophisticated machine learning system to predict whether stocks will experience significant positive growth (≥10%) over a 3-month future period. The system combines multiple data sources, extensive feature engineering, and automated model selection to create investment signals for the top 24 stocks.
 
+The reason of top-24? Of course my love to **Kobe Bryant** 🐍
+
 ### Key Objectives
 
 - **Predictive Modeling**: Build models to forecast positive stock price movements (≥10% growth in 3 months)
 - **Feature Engineering**: Extract comprehensive features from price data, fundamentals, technical indicators, and macroeconomic factors
-- **Investment Simulation**: Provide a framework for backtesting investment strategies
+- **Investment Simulation**: Provide a framework for backtesting investment strategies (currently, it does not apply simulation)
 - **Risk Assessment**: Incorporate volatility, momentum, and market sentiment indicators
 
 ## 🏗️ Project Architecture
@@ -24,8 +26,6 @@ The project follows a modular, production-ready architecture with clear separati
 ├── configs/                    # Configuration files
 │   ├── external_indicators.yaml    # FRED & macro data sources
 │   ├── preprocessing_variables.yaml # Feature preprocessing rules
-│   ├── best_model_parameters.yaml  # Optimal model configuration
-│   └── model_randomforest_*.joblib  # Trained model artifacts
 ├── data/                      # Dataset storage
 │   ├── full_dataset.csv          # Complete feature-engineered dataset
 │   └── dataset_for_modeling.csv  # Processed data ready for ML
@@ -42,7 +42,10 @@ The project follows a modular, production-ready architecture with clear separati
 └── utils/                     # Core functionality modules
     ├── data.py                # Data collection & feature engineering
     └── model.py               # ML pipeline & model evaluation
-main.py                # Compact file that enables the reproducibility of the pipeline
+└── .pre-commit-config.yaml # Configures pre-commit hooks
+└── pyproject.toml         # Ruff linter
+└── main.py                # Compact file that enables the orchestration of the pipeline
+└── requirements.txt       # Updated file with all the needed libraries to install
 ```
 
 ## 📊 Data Sources & Features
@@ -172,7 +175,7 @@ Automated comparison of three algorithms with TimeSeriesSplit cross-validation:
 
 #### **Random Forest (Best Performer)**
 - **Hyperparameters**: n_estimators=200, max_depth=5, min_samples_split=2
-- **Performance**: 60.6% accuracy, 73.3% precision on positive class
+- **Performance**: 59% accuracy, 62% precision on positive class
 - **Strengths**: Handles mixed data types, provides feature importance
 
 #### **Decision Tree**
@@ -205,7 +208,8 @@ Confusion Matrix:
 
 ### Key Insights
 - **High Precision Strategy**: Model prioritizes avoiding false positives over capturing all positive cases
-- **Conservative Approach**: 73.3% precision means ~3 out of 4 predictions are correct
+- **Threshold optimization**: Adjusting the classification threshold led to a significant improvement in model performance, yielding a gain of 9 points in precision and 1 point in accuracy. Fine-tuning this parameter proved to be crucial for optimizing prediction results.
+- **Conservative Approach**: 71% precision means ~3 out of 4 predictions are correct
 - **Risk Management**: Low false positive rate reduces potential losses from bad predictions
 
 ## 🛠️ Technology Stack
@@ -213,7 +217,7 @@ Confusion Matrix:
 ### Core Libraries
 - **Data Manipulation**: `pandas`, `numpy`
 - **Financial Data**: `yfinance`, `pandas-datareader`
-- **Technical Analysis**: `TA-Lib` (60+ indicators)
+- **Technical Analysis**: `TA-Lib`
 - **Machine Learning**: `scikit-learn`
 - **Visualization**: `matplotlib`, `seaborn`
 
@@ -237,15 +241,7 @@ Confusion Matrix:
   - 📊 Output validation
   - 🧹 Automatic cleanup
 
-## 🎯 Manual Workflow Execution
-```bash
-# Via GitHub UI: Actions → Monthly Stock Analytics Pipeline → Run workflow
-# Or via GitHub CLI:
-gh workflow run monthly-stock-analysis.yml
 
-# Test workflow with options:
-gh workflow run test-pipeline.yml -f test_mode=quick -f top_n_stocks=5
-```
 
 ### 📋 Workflow Requirements
 - **TA-Lib Installation**: Automated in workflows
@@ -283,8 +279,8 @@ Create a new Python environment with the required dependencies:
 
 ```bash
 # Create conda environment
-conda create -n stock-analytics python==3.12
-conda activate stock-analytics
+conda create -n <PREFERRED-NAME> python==3.12
+conda activate <PREFERRED-NAME>
 
 # Install dependencies
 pip install -r requirements.txt
@@ -325,7 +321,7 @@ jupyter notebook notebooks/modeling_phase.ipynb
 - Trains multiple ML algorithms with hyperparameter tuning
 - Performs time-series cross-validation
 - Selects best model based on precision metrics
-- Saves trained model and configuration files
+- Saves trained model and configuration files in `saved_models` folder
 
 ### 3. Key Configuration Files
 
@@ -396,43 +392,6 @@ else:
 2. **Risk Screening**: Filter out high-risk investments
 3. **Timing Decisions**: Identify optimal entry points
 4. **Sector Rotation**: Compare opportunities across industries
-
-
-📋 Main Pipeline Features
-🔄 Complete End-to-End Pipeline (main.py)
-The main script includes:
-
-🏗️ Modular Architecture: Object-oriented design with StockAnalyticsPipeline class
-
-📊 Five Main Phases:
-
-Phase 1: Data Collection (stocks, fundamentals, technical indicators, macro data)
-Phase 2: Dataset Creation (merging all data sources)
-Phase 3: Data Preprocessing (missing values, encoding, target creation)
-Phase 4: Model Training (hyperparameter tuning, model selection)
-Phase 5: Results Saving (datasets and model artifacts)
-🎯 Key Improvements Over Notebooks:
-
-No Figures/Plots: Removed all visualization code for streamlined execution
-Error Handling: Robust error handling for each ticker and phase
-Progress Tracking: Clear progress indicators and summaries
-Configurable: Easy to adjust number of stocks (default: 24)
-Logging: Comprehensive status messages and results summary
-🧪 Supporting Files
-test_pipeline.py - Validates setup and configuration
-run_example.py - Provides usage examples:
-demo mode: Quick test with 5 stocks
-full mode: Complete pipeline with 24 stocks
-analyze mode: Analyze existing data
-⚡ Usage
-🎯 Key Benefits
-⏱️ Time Efficient: Single command execution vs multiple notebook cells
-🔄 Reproducible: Consistent execution environment
-📊 Production Ready: Proper error handling and logging
-🎛️ Configurable: Easy parameter adjustment
-📁 Organized Output: Structured data and model saving
-The main.py script eliminates the need to manually run notebook cells and provides a clean, professional interface for the entire stock analytics pipeline. It maintains all the core functionality while removing redundant visualizations and providing better error handling and progress tracking.
-
 
 ## 🔬 Research & Development
 
