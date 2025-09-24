@@ -46,10 +46,6 @@ def run_full_pipeline():
 
 def analyze_existing_data():
     """Analyze data that's already been created."""
-    from pathlib import Path
-
-    import pandas as pd
-
     data_dir = Path('data')
 
     if (data_dir / 'full_dataset.csv').exists():

@@ -103,7 +103,7 @@ def fit_knn(X, y, n_neighbors=5):
 
 
 
-def tune_and_select_best_classifier(X_train_valid, y_train_valid, X_test, y_test, scorer=None):
+def tune_and_select_best_classifier(X_train_valid, y_train_valid, X_test, y_test, scorer=None, folder_to_save=None):
     """Tune and select the best classifier among Decision Tree, Random Forest, and KNN using GridSearchCV.
 
     This function performs hyperparameter tuning for three classifiers using time series cross-validation.
@@ -122,8 +122,8 @@ def tune_and_select_best_classifier(X_train_valid, y_train_valid, X_test, y_test
         Test labels.
     scorer : callable, optional
         Scoring function (default: precision of positive class).
-    yaml_path : str, optional
-        File path for exporting model info as YAML.
+    folder_to_save : str, optional
+        File path for exporting model info as YAML and actual model as .joblib.
 
     Returns
     -------
@@ -216,7 +216,10 @@ def tune_and_select_best_classifier(X_train_valid, y_train_valid, X_test, y_test
     }
 
     # Define folder for saving models
-    custom_folder = '../saved_models/'
+    if folder_to_save is not None:
+        custom_folder = folder_to_save
+    else:
+        custom_folder = '../saved_models/'
     os.makedirs(custom_folder, exist_ok=True)
 
 
